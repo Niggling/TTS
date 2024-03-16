@@ -2,7 +2,7 @@ import logging
 import os
 import torch
 from TTS.api import TTS
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 
 app = Flask(__name__)
 
@@ -17,24 +17,40 @@ tts = TTS("tts_models/zh-CN/baker/tacotron2-DDC-GST")
 audio_directory = "audio"
 
 @app.route('/synthesize', methods=['GET'])
+# def synthesize():
+#     logging.info("Audio generation request received.")
+#     text = request.args.get('text', '')
+#     if text:
+#         logging.info("Audio generation started.")
+#         # 生成音频文件的文件名
+#         file_name = "test11.wav"
+#         file_path = os.path.join(audio_directory, file_name)  # 构建完整的文件路径
+#         tts.tts_to_file(text=text, file_path=file_path)
+#         # 记录日志消息
+#         logging.info("Audio generated successfully.")
+#         # 返回带有CORS头信息的响应，包括音频文件的URL
+#         audio_url = request.host_url + file_path.replace("\\", "/")  # 构建音频文件的URL，并替换反斜杠为正斜杠
+#         response = jsonify({"message": "Audio generated successfully.", "audioUrl": audio_url})
+#         response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+#         return response, 200
+#     else:
+#         # 记录日志消息
+#         logging.error("No text provided.")
+#         response = jsonify({"error": "No text provided."})
+#         response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+#         return response, 400
+
 def synthesize():
     logging.info("Audio generation request received.")
     text = request.args.get('text', '')
     if text:
         logging.info("Audio generation started.")
-        # 生成音频文件的文件名
         file_name = "test10.wav"
-        file_path = os.path.join(audio_directory, file_name)  # 构建完整的文件路径
+        file_path = os.path.join(audio_directory, file_name)
         tts.tts_to_file(text=text, file_path=file_path)
-        # 记录日志消息
         logging.info("Audio generated successfully.")
-        # 返回带有CORS头信息的响应，包括音频文件的URL
-        audio_url = request.host_url + file_path.replace("\\", "/")  # 构建音频文件的URL，并替换反斜杠为正斜杠
-        response = jsonify({"message": "Audio generated successfully.", "audioUrl": audio_url})
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-        return response, 200
+        return send_file(file_path, mimetype="audio/wav", as_attachment=True)
     else:
-        # 记录日志消息
         logging.error("No text provided.")
         response = jsonify({"error": "No text provided."})
         response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
